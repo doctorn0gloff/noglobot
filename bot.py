@@ -8,8 +8,10 @@ import msgame.classes
 bot = commands.Bot(command_prefix="&", help_command=commands.DefaultHelpCommand(width=200))
 #might write a custom HelpCommand child class later and import it in. Override the classmethods of the HelpCommand class to do so
 
-#if im gonna migrate this to a cog later, i should copy over this bottaskmanager as well. Each cog will have its own bottaskmanager. Probably should rename to CogTaskManager or something, but yeah.
-#when migrating to cog, everything should be wrapped in a MyCog class, and every function in the commands should be prefixed with self. @bot.command() becomes @commands.command()
+# if im gonna migrate this to a cog later, i should copy over this bottaskmanager as well. 
+# Each cog will have its own bottaskmanager. Probably should rename to CogTaskManager or something.
+# when migrating to cog, everything should be wrapped in a MyCog class, and every function in the 
+# commands should be prefixed with self. @bot.command() becomes @commands.command()
 class BotTaskManager():
     def __init__(self):
         self.tasks = dict()
@@ -19,9 +21,12 @@ class BotTaskManager():
         newgame = msgame.classes.Game(gamemaster)
         self.tasks[gamemaster] = newgame
         
-        #identify each running task or masoi game with its gamemaster, and access each game by the user currently requesting commands.
-        #author user from the command message's ctx will be passed along to the bot task manager's running tasks (running objects) dict, as index names to refer to the correct Game instance.
-        #this way, there is functionality to restrict access to a game or a task to the gamemaster or user that requested it (because the wrong user making a command will call an index without an associated game so nothing will happen)
+        # identify each running task or masoi game with its gamemaster, and access each game 
+        # by the Member object of the user currently requesting commands.
+        # This Member from the message's ctx will be passed along to the bot task manager's 
+        # running tasks (running objects) dict, as index names to refer to the correct Game instance.
+        # this way, there is functionality to restrict access to a game or a task to the gamemaster 
+        # or user that requested it (because the wrong user making a command will call an index without an associated game so nothing will happen)
 
 bottaskmgr = BotTaskManager()
 #the point of the bottaskmanager is to allow multiple instances of a game or task object to run at once, each having an owner user.
@@ -31,7 +36,6 @@ async def on_ready():
     print("Logged on as:")
     print(bot.user.name)
     print(bot.user.id)
-    
     
 #declaring the bot's commands
 @bot.command(pass_context=True)
@@ -152,7 +156,8 @@ async def killvote(ctx):
     for i in range(howmanyemojis):
         await pollmsg.add_reaction(emojilist[i])
         
-    bottaskmgr.workingmsgs[ctx.author] = pollmsg #puts the Message object just created into the workingmsgs dict of the taskmanager, with the same gamemaster as index.
+    bottaskmgr.workingmsgs[ctx.author] = pollmsg 
+    #puts the Message object just created into the workingmsgs dict of the taskmanager, with the same gamemaster as index.
     
     
 @ms.error

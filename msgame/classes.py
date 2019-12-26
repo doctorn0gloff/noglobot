@@ -7,7 +7,8 @@ class Game:
         self.config = { 
         "assign_randomly":True,
         "entered_members":[], #list of members who entered game to play
-        "allowed_chars":[], #list of allowed characters to be used when auto assigning. repeated entries allowed to show number of each character allowed.
+        "allowed_chars":[], #list of allowed characters to be used when auto assigning. 
+        # repeated entries allowed to show number of each character allowed.
         }
         self.gamemaster = gamemastermember #this is who the quản trò will be
         self.roster = dict()
@@ -29,8 +30,9 @@ class Game:
     #a decorator to prefix functions that can only happen during setup time
     def game_settingup(func):
         def func_wrapper(*args, **kwargs):
-            if args[0].game_inprogress == False and args[0].game_ended == False: #when the game setup is still happening, allow setup functions to occur. 
-            #Since this decorator is used with class methods, the "args[0]" represents the "self" passed to each method.
+            if args[0].game_inprogress == False and args[0].game_ended == False: 
+            # when the game setup is still happening, allow setup functions to occur. 
+            # Since this decorator is used with class methods, the "args[0]" represents the "self" passed to each method.
                 return func(*args, **kwargs)
             else:
                 return "Game đang chơi giữa chừng, không thay đổi setup được!"
@@ -59,16 +61,13 @@ class Game:
     @game_settingup
     def roster_add(self, member, charcode):
         self.roster[member] = charcode
-        # if charcode in chartypes[0]: #if a villager-class character
-            # self.roster[member] = Villager(charcode, member)
-        # elif charcode in chartypes[1]: #else if a wolf-class character
-            # self.roster[member] = Wolf(charcode, member)
-    
+        
     @game_settingup
     def roster_randomassign(self):
         returnmsg = ""
         if len(self.config["allowed_chars"]) != len(self.config["entered_members"]):
-            returnmsg = "Số người chơi không khớp với số nhân vật được phân bố! Sửa lại danh sách nhân vật cho game này, hoặc thêm bớt người chơi sao cho khớp."
+            returnmsg = "Số người chơi không khớp với số nhân vật được phân bố!" 
+            returnmsg += "Sửa lại danh sách nhân vật cho game này, hoặc thêm bớt người chơi sao cho khớp."
         else:
             chars = self.config["allowed_chars"][:]
             shuffle(chars)
@@ -97,14 +96,6 @@ class Game:
             counter += 1
         return summarymsg
     
-    # def roster_getdeadsummary(self, todayonly):
-        # deadsummary = ""
-        # if todayonly:
-            # if len(self.dead_today) != 0:
-                # for p in self.dead_today:
-                    # displayname = displaynames[chartypes.index(self.dead_today[p])]
-                    # deadsummary +=  
-
     def listcharactercodes(self):
         return "``` \n"+"\n".join([disp+": "+char for disp, char in zip(displaynames,chartypes)])+"\n ```"
     
@@ -156,7 +147,9 @@ class Game:
             self.current_day += 1
             deadtodayreport = self.dead_today #TODO: fix that print on the deadtoday report. Write a func to output the proper mentions instead of just printing the list.
             self.dead_today = []
-            returnmsg += "Bắt đầu ngày thứ "+str(self.current_day)+"! \n \n **Các người chơi hiện tại** (gạch chéo là đã ded): \n"+self.roster_getsummary(False)+"\n Đêm qua có thêm "+str(len(deadtodayreport))+" người chơi chết, là "+str([str(p) for p in deadtodayreport])
+            returnmsg += "Bắt đầu ngày thứ "+str(self.current_day)
+            returnmsg += "! \n \n **Các người chơi hiện tại** (gạch chéo là đã ded): \n"+self.roster_getsummary(False)
+            returnmsg += "\n Đêm qua có thêm "+str(len(deadtodayreport))+" người chơi chết, là "+str([str(p) for p in deadtodayreport])
             returnmsg += self.game_detect_end(False)
             return returnmsg
             
@@ -209,15 +202,18 @@ class Vote:
     def __init__(self, candidates, winfunc, funcparamslist, winratio, maxballots, passwinnertofunc):
         self.func = winfunc #the function to execute when the vote is won
         self.funcparams = funcparamslist
-        self.passwinner = passwinnertofunc #include or not the winner item into the win function. If the winner is the only argument, then funcparams can be empty list [].
-        self.winratio = winratio #min percentage of votes required for any item to win. Set this to -1 in order to simply pick the item with the highest ballot count as winner.
+        self.passwinner = passwinnertofunc #include or not the winner item into the win function. 
+            # If the winner is the only argument, then funcparams can be empty list [].
+        self.winratio = winratio #min percentage of votes required for any item to win. 
+            # Set this to -1 in order to simply pick the item with the highest ballot count as winner.
         self.candidates = candidates #a list containing objects or things to be voted on
         
         self.votesdict = dict()
         for c in candidates:
             self.votesdict[c] = 0 #initializing the vote count for each candidate
         
-        self.maxballots = maxballots #if set to -1, then there is no max ballot count. Vote ends when max ballot count reached; winner will be the candidate with most votes.
+        self.maxballots = maxballots #if set to -1, then there is no max ballot count. 
+            # Vote ends when max ballot count reached; winner will be the candidate with most votes.
         self.ballots = 0
         
     def ballot_add(self, candidate):
@@ -239,7 +235,8 @@ class Vote:
             for c in self.candidates:
                 if self.votesdict[c] > majorityrequired:
                     winner = c
-        #now that the winner is found, execute the function with the winner candidate as a parameter (along with any other parameters inside the paramlist)
+        # now that the winner is found, execute the function with the winner candidate as a parameter 
+            # (along with any other parameters inside the paramlist)
         if self.passwinner:
             paramslist.insert(0, winner)
         
