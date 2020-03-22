@@ -12,16 +12,16 @@ class Base(commands.Cog):
         await ctx.send("Woof!")
         
     @commands.command(pass_context=True)
+    @commands.is_owner()
     async def goaway(self, ctx):
-        if await self.bot.is_owner(ctx.author): #if the guy who invoked this command is me, then
-            await ctx.send("okay i'll leave now")
-            await self.bot.logout()
+        await ctx.send("okay i'll leave now")
+        await self.bot.logout()
 
     @commands.command(pass_context=True)
+    @commands.is_owner()
     async def cogrl(self, ctx, cogname):
-        if await self.bot.is_owner(ctx.author):
-            self.bot.reload_extension("cogs."+cogname)
-            await ctx.send("reloaded {}".format(cogname))
+        self.bot.reload_extension("cogs."+cogname)
+        await ctx.send("reloaded {}".format(cogname))
 
     @commands.Cog.listener()
     async def on_message(self,message):

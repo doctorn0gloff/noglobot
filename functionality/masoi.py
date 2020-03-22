@@ -2,7 +2,6 @@
 
 from random import shuffle
 from utils.vote import Vote
-from utils.reactable import Reactable
 
 CHARTYPES = [
             "cupd","secg","hunt","witc","prph","vlgr","snpr","mmag","sis1",
@@ -35,7 +34,7 @@ def game_settingup(func):
     
 
 
-class Masoi(Reactable):
+class Masoi:
     def __init__(self, gamemastermember):
         self.config = { 
         "assign_randomly":True,
