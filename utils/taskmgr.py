@@ -3,9 +3,13 @@ import discord
 class CogTaskManager:
     def __init__(self):
         self.tasks = dict()
-        self.error_type = None
+        self.error_type = NotImplementedError
         #messages on which we're listening for events, indexed by associated owner member
     
+    @property
+    def task_dict(self):
+        return self.tasks
+
     def define_unknown_owner_error(self, exception):
         self.error_type = exception
 
@@ -18,8 +22,8 @@ class CogTaskManager:
             return self.tasks[owner]
         except KeyError:
             print("Member {} does not own any tasks at the moment!".format(str(owner)))
-            raise
-            
+            raise self.error_type
+
         # identify each running task with its owner, and access each task 
         # by the Member object of the user currently requesting commands.
         # This Member from the message's ctx will be passed along to the bot task manager's 

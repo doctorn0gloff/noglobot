@@ -28,14 +28,15 @@ class NhoanCount(commands.Cog, SavesDataCSV):
     @commands.command(pass_context = True)
     async def nhoankings(self, ctx):
         allnhoan = self.get_data_dict()
+        msg = ""
         top5 = sorted(list(allnhoan), key = lambda m_id: allnhoan[m_id]["nhoan"], reverse = True)[:5]
-        await ctx.send("***Khúm núm before your nhoặn kings!***")
+        msg += "***Khúm núm before your nhoặn kings!***\n"
         for i, member_id in enumerate(top5):
             memb = self.bot.get_user(int(member_id))
             nhoantimes = allnhoan[member_id]["nhoan"]
-            await ctx.send(
-                "**{0}**: {1}, with {2} nhoặn post{3}".format(i+1, memb.name, nhoantimes, "s" if nhoantimes != 1 else "")
-            )
+            msg+= "**{0}**: {1}, with {2} nhoặn post{3}\n".format(
+                i+1, memb.name, nhoantimes, "s" if nhoantimes != 1 else "")
+        await ctx.send(msg)
 
 def setup(bot):
     bot.add_cog(NhoanCount(bot))

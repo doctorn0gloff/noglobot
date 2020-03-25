@@ -16,7 +16,8 @@ async def on_ready():
 cogs = [
     'base',
     'masoigame',
-    'nhoan'
+    'nhoan',
+    'reacttest'
 ]
 
 if (__name__ == "__main__"):

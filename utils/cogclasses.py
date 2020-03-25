@@ -1,52 +1,76 @@
 import discord
 import csv
 
+from utils.converters import emoji_convert
 #######################################
 #         Cog superclasses            #
 #           -------------             #
 # Pick and choose superclasses for    #
-# your cogs for extra features!       #
+# your cogs for extra features        #
 #######################################
 
 # The Reactable cog superclass.
 # For cogs that need to have messages that listen for reactions.
 
+# A helper wrapper class to store the messages being watched for reactions
+class ReactMsg:
+    def __init__(self, msg: discord.Message, owner: discord.Member):
+        self.msg = msg
+        self.owner = owner
+        self.emoji_to_choice_map = dict()
+        
+    async def add_choice(self, ctx, raw_emoji, choice):
+        converted_emoji = emoji_convert(ctx, raw_emoji)
+        self.emoji_to_choice_map[converted_emoji] = choice
+        await self.msg.add_reaction(converted_emoji)
+
 class Reactable:
     def __init__(self):
-        self.emoji_to_choice_map = dict()
-        self.emojis = set() #set of discord.Emoji objects
-        self.currently_listening = False
-        self.msgs_listening_for_reactions = []
+        self.reactables = dict() #(k :: message ID, v :: ReactMsg)
+    # def init_new_choice(self, ctx, emoji: discord.Emoji, choice):
+    #     self.emoji_to_choice_map[emoji] = choice
+    #     # n_emojis_before = len(self.emojis)
+    #     self.emojis.add()
+    #     # if (refresh == True):
+    #     #     if (len(self.emojis) > n_emojis_before):
+    #     #         # refreshes all existing listening msgs to include the new choice
+    #     #         for msg in self.reactables:
+    #     #             await msg.add_reaction(emoji)
+    async def init_reactable_message(self, msgcontext, msg: discord.Message, owner: discord.Member, raw_emojis, choices):
+        new_reactable_msg = ReactMsg(msg, owner)
+        self.reactables[msg.id] = new_reactable_msg
+        for e, c in zip(raw_emojis, choices):
+            new_reactable_msg.add_choice(msgcontext, e, c)
     
-    async def init_new_choice(self, emoji: discord.Emoji, choice, refresh: bool):
-        self.emoji_to_choice_map[emoji] = choice
-        n_emojis_before = len(self.emojis)
-        self.emojis.add(emoji)
-        if (refresh == True):
-            if (len(self.emojis) > n_emojis_before):
-                # refreshes all existing listening msgs to include the new choice
-                for msg in self.msgs_listening_for_reactions:
-                    await msg.add_reaction(emoji)
-            
-    async def init_reactable_message(self, msg: discord.Message):
-        self.msgs_listening_for_reactions.append(msg)
-        for e in self.emojis:
-            await msg.add_reaction(e)
-        self.currently_listening = True
-    
-    async def on_react(self, reaction: discord.Reaction, choice_func, purge_irrelevant_reactions: bool):
-        if (not self.currently_listening):
+    async def on_react(
+        self, 
+        restrict_user, 
+        reaction: discord.Reaction, 
+        user: discord.Member, 
+        response_func):
+
+        if (user == restrict_user): # to prevent the bot from responding to its own reaction_add
             return None
-        #choice_func :: choice -> b
+        #response_func :: choice -> discord.Member -> str
         reacted_msg = reaction.message
-        for msg in self.msgs_listening_for_reactions:
-            if (msg == reacted_msg):
+        for msgid in self.reactables:
+            if (msgid == reacted_msg.id):
+                print("got the message being reacted on")
                 e = reaction.emoji
-                if (e in self.emoji_to_choice_map):
-                    return choice_func(self.emoji_to_choice_map[reaction.emoji])
-                else:
-                    if (purge_irrelevant_reactions == True):
-                        await reacted_msg.clear_reaction(reaction)
+                reactable_msg = self.reactables[msgid]
+                if (reacted_msg.author == reactable_msg.owner):
+                    if (e in reactable_msg.emoji_to_choice_map):
+                        response = response_func(reactable_msg.emoji_to_choice_map[e], reactable_msg.owner)
+                        print("hello i'm doing something")
+                        await reacted_msg.channel.send(response)
+                        return response
+                # else:
+                #     if (purge_irrelevant_reactions == True):
+                #         print("purging")
+                #         await reacted_msg.clear_reaction(reaction)
+                #         return None
+                        
+            
 
 
 # The SavesDataCSV cog superclass.
