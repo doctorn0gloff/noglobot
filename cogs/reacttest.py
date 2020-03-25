@@ -12,7 +12,7 @@ class ReactTest(commands.Cog, Reactable):
     @commands.is_owner()
     async def reacttest(self, ctx):
         msg = await ctx.send("react with yes or no")
-        await self.init_reactable_message(ctx, msg, ctx.author, ['⭕','❌'], [1,0])
+        await self.make_message_reactable(ctx, msg, ctx.author, ['⭕','❌'], [1,0])
     
     @commands.Cog.listener()
     async def on_reaction_add(self, reaction, user):

@@ -20,56 +20,34 @@ class ReactMsg:
         self.emoji_to_choice_map = dict()
         
     async def add_choice(self, ctx, raw_emoji, choice):
-        converted_emoji = emoji_convert(ctx, raw_emoji)
+        converted_emoji = await emoji_convert(ctx, raw_emoji)
         self.emoji_to_choice_map[converted_emoji] = choice
         await self.msg.add_reaction(converted_emoji)
 
 class Reactable:
     def __init__(self):
         self.reactables = dict() #(k :: message ID, v :: ReactMsg)
-    # def init_new_choice(self, ctx, emoji: discord.Emoji, choice):
-    #     self.emoji_to_choice_map[emoji] = choice
-    #     # n_emojis_before = len(self.emojis)
-    #     self.emojis.add()
-    #     # if (refresh == True):
-    #     #     if (len(self.emojis) > n_emojis_before):
-    #     #         # refreshes all existing listening msgs to include the new choice
-    #     #         for msg in self.reactables:
-    #     #             await msg.add_reaction(emoji)
-    async def init_reactable_message(self, msgcontext, msg: discord.Message, owner: discord.Member, raw_emojis, choices):
+    
+    async def make_message_reactable(self, msgcontext, msg: discord.Message, owner: discord.Member, raw_emojis, choices):
         new_reactable_msg = ReactMsg(msg, owner)
         self.reactables[msg.id] = new_reactable_msg
         for e, c in zip(raw_emojis, choices):
-            new_reactable_msg.add_choice(msgcontext, e, c)
+            await new_reactable_msg.add_choice(msgcontext, e, c)
     
-    async def on_react(
-        self, 
-        restrict_user, 
-        reaction: discord.Reaction, 
-        user: discord.Member, 
-        response_func):
-
+    async def on_react(self, restrict_user, reaction: discord.Reaction, user: discord.Member, response_func):
         if (user == restrict_user): # to prevent the bot from responding to its own reaction_add
             return None
         #response_func :: choice -> discord.Member -> str
         reacted_msg = reaction.message
+        reacted_msg_id = reacted_msg.id
         for msgid in self.reactables:
-            if (msgid == reacted_msg.id):
-                print("got the message being reacted on")
+            if (msgid == reacted_msg_id):
                 e = reaction.emoji
                 reactable_msg = self.reactables[msgid]
-                if (reacted_msg.author == reactable_msg.owner):
-                    if (e in reactable_msg.emoji_to_choice_map):
-                        response = response_func(reactable_msg.emoji_to_choice_map[e], reactable_msg.owner)
-                        print("hello i'm doing something")
-                        await reacted_msg.channel.send(response)
-                        return response
-                # else:
-                #     if (purge_irrelevant_reactions == True):
-                #         print("purging")
-                #         await reacted_msg.clear_reaction(reaction)
-                #         return None
-                        
+                if (user == reactable_msg.owner) and (e in reactable_msg.emoji_to_choice_map):
+                    response = response_func(reactable_msg.emoji_to_choice_map[e], reactable_msg.owner)
+                    await reacted_msg.channel.send(response)
+                    return response
             
 
 
