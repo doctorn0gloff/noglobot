@@ -10,7 +10,16 @@ class Base(commands.Cog):
     async def bark(self, ctx):
         """make it bark"""
         await ctx.send("Woof!")
-        
+
+    @commands.command(pass_context=True)
+    async def whois(self, ctx, memberID):
+        try:
+            memberIDint = int(memberID)
+        except:
+            await ctx.send("Unable to convert argument into ID integer")
+        member = self.bot.get_user(memberIDint)
+        await ctx.send("Member with ID {0} is {1}".format(memberIDint, str(member)))
+
     @commands.command(pass_context=True)
     @commands.is_owner()
     async def goaway(self, ctx):
