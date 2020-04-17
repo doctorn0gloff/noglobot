@@ -119,7 +119,7 @@ class Masoi:
     
     def game_start(self):
         self.game_inprogress = True
-        self.current_day = 1
+        return self.game_day_new()
     
     def game_detect_end(self, manual):
         wolfchars = CHARTYPES[19:]
@@ -157,7 +157,7 @@ class Masoi:
   
   
     def game_day_new(self):
-        if self.is_night == False:
+        if (self.current_day > 0 and self.is_night == False):
             return "Vẫn đang là ban ngày của ngày thứ "+str(self.current_day)+"! Quản trò xong chuyện đêm đã rồi mới sang ngày mới được."
         else:
             returnmsg = ""
@@ -167,11 +167,14 @@ class Masoi:
             self.dead_today = []
             returnmsg += "Bắt đầu ngày thứ "+str(self.current_day)
             returnmsg += "! \n \n **Các người chơi hiện tại** (gạch chéo là đã ded): \n"+self.roster_getsummary(False)
-            returnmsg += "\n Đêm qua có thêm "+str(len(deadtodayreport))+" người chơi chết, là "+str([str(p) for p in deadtodayreport])
-            returnmsg += self.game_detect_end(False)
+            if (self.current_day > 1):
+                returnmsg += "\n Đêm qua có thêm "+str(len(deadtodayreport))+" người chơi chết, là "+str([str(p) for p in deadtodayreport])
+                returnmsg += self.game_detect_end(False)
             return returnmsg
             
     def game_day_night(self):
+        if (self.is_night == True):
+            return "Đang là ban đêm rồi."
         self.is_night = True
         return "Màn đêm thứ "+str(self.current_day)+" đã bắt đầu!"
         

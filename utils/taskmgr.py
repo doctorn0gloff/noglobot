@@ -21,7 +21,7 @@ class CogTaskManager:
         try:
             return self.tasks[owner]
         except KeyError:
-            print("Member {} does not own any tasks at the moment!".format(str(owner)))
+            print("Member {} does not own any tasks to refer to".format(str(owner)))
             raise self.error_type
 
         # identify each running task with its owner, and access each task 
@@ -30,3 +30,9 @@ class CogTaskManager:
         # running tasks (running objects) dict, as index names to refer to the correct task instance.
         # this way, there is functionality to restrict access to a game or a task to the owner 
         # or user that requested it.
+
+    def kill_task(self, owner: discord.Member):
+        try:
+            del(self.tasks[owner])
+        except KeyError:
+            print("Member {} does not own any tasks to kill".format(str(owner)))

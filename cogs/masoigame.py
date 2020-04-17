@@ -24,6 +24,11 @@ class MasoiGame(commands.Cog):
             await ctx.send("invalid argument: expected a discord user tag. Usage: &ms start @user")
             return
         self.taskmgr.start_task(member, Masoi)
+        await ctx.send("Đã tạo game ma sói mới, với quản trò là "+member.name)
+    @newgame.error
+    async def newgame_error(self, ctx, error):
+        if isinstance(error, (commands.CommandInvokeError, commands.MissingRequiredArgument)):
+            await ctx.send("Thiếu tùy chọn cho lệnh!")
 
     @ms.command(pass_context=True)
     async def printdebug(self, ctx):
@@ -122,8 +127,11 @@ class MasoiGame(commands.Cog):
     @ms.error
     async def ms_error(self, ctx, error):
         print(str(error))
-        if isinstance(error, commands.CommandInvokeError):
+        print("type of error is : "+str(type(error)))
+        if isinstance(error, commands.errors.CommandInvokeError):
             await ctx.send("Bạn không phải là quản trò cho game ma sói nào cả!")
+        elif isinstance(error, commands.errors.MissingRequiredArgument):
+            await ctx.send("Thiếu tùy chọn cho lệnh!")
         
     #to migrate events to a cog, replace the @bot.event decorators with @commands.Cog.listener() and instances of bot become self.bot
     #@commands.Cog.listener()
